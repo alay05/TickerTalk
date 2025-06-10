@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from analyzer import analyze_ticker
 
-# Serve from the 'frontend' folder (where index.html lives)
 app = Flask(__name__, static_folder='frontend', static_url_path='')
 
 @app.route('/')
