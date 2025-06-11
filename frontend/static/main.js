@@ -81,6 +81,9 @@ async function analyze() {
     void marker.offsetWidth;
     marker.style.left = `calc(${percentage}% - 0.5rem)`;
 
+    const tooltip = document.getElementById("markerTooltip");
+    tooltip.textContent = `${score.toFixed(1)}`;
+
     await renderChart(ticker, data.ticker);
     await renderArticles(ticker);
 

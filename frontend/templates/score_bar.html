@@ -4,14 +4,17 @@
     <div class="absolute left-[30%] top-0 h-full bg-yellow-400" style="width: 40%;"></div>
     <div class="absolute left-[70%] top-0 h-full bg-green-500 rounded-r-md" style="width: 30%;"></div>
 
-    <div id="marker" class="absolute -top-2 w-1 bg-black h-10 flex flex-col-reverse items-center z-20 rounded-full transition-all duration-[1.5s] ease-out delay-100">
-      <div class="text-[8px] text-black font-medium leading-tight text-center mb-11">
+    <div id="marker" class="group absolute -top-2 w-1 bg-black h-10 flex flex-col-reverse items-center z-20 rounded-full transition-all duration-[1.5s] ease-out delay-100">
+      <div class="text-[9px] text-black font-medium leading-tight text-center mb-11">
         sentiment<br>score
+      </div>
+      <div class="mt-1 absolute top-full text-center bg-gray-800 text-white text-xs px-1.5 py-1 rounded-md opacity-0 group-hover:opacity-70 transition pointer-events-none z-50" id="markerTooltip">
+        Score: --
       </div>
     </div>
   </div>
 
-  <div class="flex justify-between text-[10px] text-gray-500 mt-0.5">
+  <div class="flex justify-between text-[10px] text-gray-500 mt-1">
     <span>0</span><span>2.5</span><span>5</span><span>7.5</span><span>10</span>
   </div>
 </div>

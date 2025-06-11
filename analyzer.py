@@ -44,7 +44,7 @@ def analyze_ticker(ticker, preloaded_articles=None):
 
     return {
         "ticker": ticker,
-        "company_name": stock.info.get("shortName").title(),
+        "company_name": stock.info.get("longName") if len(stock.info.get("longName", "")) <= 35 else stock.info.get("shortName", ""),
         "sentiment_score": round(avg_score*5 + 5, 1),
         "recommendation": decision,
     }
