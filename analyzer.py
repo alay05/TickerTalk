@@ -47,9 +47,10 @@ def analyze_ticker(ticker):
                 break
 
     avg_score = sum(scores) / len(scores) if scores else 0.0
-    if avg_score >= 0.5:
+    threshold = 2 # for score 0-10
+    if avg_score >= threshold/5:
         decision = "BUY"
-    elif avg_score <= -0.5:
+    elif avg_score <= -threshold/5:
         decision = "SELL"
     else:
         decision = "HOLD"
@@ -57,7 +58,7 @@ def analyze_ticker(ticker):
     return {
         "ticker": ticker,
         "company_name": name.title(),
-        "sentiment_score": round(avg_score, 3),
+        "sentiment_score": round(avg_score*5 + 5, 1),
         "recommendation": decision,
     }
 
