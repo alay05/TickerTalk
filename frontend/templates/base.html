@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TickerTalk</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen px-4">
+  <div class="bg-white p-12 rounded-2xl shadow-xl w-full max-w-2xl">
+
+    <h1 class="text-4xl font-extrabold mb-2 text-center">TickerTalk</h1>
+    <p class="text-lg text-gray-600 mb-6 text-center">
+        Real-time sentiment analysis from the latest market headlines.
+    </p>
+
+    {% include "input.html" %}
+    {% include "spinner.html" %}
+    {% include "output.html" %}
+    {% include "score_bar.html" %}
+    {% include "price_chart.html" %}
+    {% include "bottom_buttons.html" %}
+    {% include "articles_section.html" %}
+
+  </div>
+
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import yfinance as yf
 from analyzer import analyze_ticker
 from news.yahooArticles import get_yahoo_articles
@@ -6,13 +6,13 @@ from news.googleArticles import get_google_news_articles
 from news.finnhubArticles import get_finnhub_articles
 from news.deduplicate import deduplicate_articles
 
-app = Flask(__name__, static_folder='frontend', static_url_path='')
+app = Flask(__name__, template_folder='frontend/templates', static_folder='frontend/static')
 
 article_cache = {}
 
-@app.route('/')
-def index():
-    return app.send_static_file('index.html')
+@app.route("/")
+def home():
+    return render_template("base.html")
 
 @app.route('/analyze', methods=['GET'])
 def analyze():
