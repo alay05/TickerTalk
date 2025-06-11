@@ -1,33 +1,25 @@
 import yfinance as yf
 from ibm_watson.natural_language_understanding_v1 import Features, EntitiesOptions
 from config import nlu
+from news.yahooArticles import get_yahoo_articles
+from news.googleArticles import get_google_news_articles
+from news.finnhubArticles import get_finnhub_articles
+from news.deduplicate import deduplicate_articles
 
 def analyze_ticker(ticker):
     ticker = ticker.upper()
     stock = yf.Ticker(ticker)
     name = (stock.info.get("displayName") or stock.info.get("shortName") or stock.info.get("longName") or ticker).lower()
 
-    articles = stock.news
-    simplified = []
+    # set quantities from each source
+    yahoo_articles = get_yahoo_articles(ticker, 10)
+    google_articles = get_google_news_articles(ticker, 10)
+    finnhub_articles = get_finnhub_articles(ticker, 30)
 
-    for art in articles:
-        cont = art.get("content", {})
-        url = (
-            (art.get("clickThroughUrl") or {}).get("url")
-            or (art.get("canonicalUrl") or {}).get("url")
-            or (cont.get("clickThroughUrl") or {}).get("url")
-            or (cont.get("canonicalUrl") or {}).get("url")
-            or None
-        )
-        simplified.append({
-            "title": cont.get("title"),
-            "summary": cont.get("summary") or cont.get("description"),
-            "url": url,
-            "pubDate": cont.get("pubDate")
-        })
+    articles = deduplicate_articles([yahoo_articles, google_articles, finnhub_articles])
 
     scores = []
-    for art in simplified:
+    for art in articles:
         text = f"{art.get('title', '')}. {art.get('summary', '')}"
         if not text.strip():
             continue
