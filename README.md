@@ -9,7 +9,7 @@ ADD A VIDEO LINK
 ## Features
 
 - **User Input**: Allows users to enter a stock ticker (e.g., `TSLA`, `GOOG`)
-- **Article Aggregation**: Pulls recent news from Yahoo Finance, Google News, and Finnhub APIs to gather relevant headlines for analysis
+- **Article Aggregation**: Pulls recent news from Yahoo Finance, Finnhub, and Google News APIs to gather relevant headlines for analysis
 - **Sentiment Analysis**: Articles are processed using IBM Watson NLU to extract and score sentiment
 - **Investment Advice**: Displays a "Buy", "Hold", or "Sell" label based on average sentiment
 - **Visualization**:
@@ -24,9 +24,6 @@ ADD A VIDEO LINK
 - **Data & Analysis**: IBM NLU
 
 ## Running Locally
-
-### Backend
-
 1. Clone the repository:
    ```bash
    git clone https://github.com/alay05/TickerTalk.git
@@ -46,7 +43,7 @@ ADD A VIDEO LINK
 5. Start the server:
    ```bash
    python app.py
-6. Visit http://localhost:5000 or http://127.0.0.1:5000 in your browser.
+6. Visit http://127.0.0.1:5000 in your browser.
 
 ## License
 
