@@ -87,11 +87,20 @@
     <!-- Price Chart -->
     <canvas id="priceChart" class="mt-10 hidden" style="height: 300px; max-height: 300px;"></canvas>
     
-    <!-- Back Button -->
-    <div class="mt-6">
-      <button id="backBtn" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition hidden">
+    <!-- Back and Articles Button -->
+    <div id="buttonRow" class="mt-6 flex justify-between items-center hidden">
+      <button id="articlesBtn" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+        Show Articles
+      </button>
+      <button id="backBtn" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
         ← Back
       </button>
+    </div>
+
+    <!-- Articles List -->
+    <div id="articlesSection" class="mt-6 hidden">
+      <h3 class="text-xl font-bold mb-4">Articles:</h3>
+      <div id="articlesList" class="space-y-4"></div>
     </div>
   </div>
 
@@ -232,7 +241,26 @@
               }
             }
           }
+          
         });
+        const articlesRes = await fetch(`/articles?ticker=${ticker}`);
+        const articlesData = await articlesRes.json();
+
+        const articlesList = document.getElementById("articlesList");
+        articlesList.innerHTML = "";
+        articlesData.forEach(article => {
+          const articleDiv = document.createElement("div");
+          articleDiv.className = "border rounded-lg p-4 hover:bg-gray-50 transition";
+          articleDiv.innerHTML = `
+            <a href="${article.url}" target="_blank" class="text-blue-600 font-semibold text-lg hover:underline">
+              ${article.title}
+            </a>
+            <p class="text-gray-700 text-sm mt-1">${article.summary}</p>
+          `;
+          articlesList.appendChild(articleDiv);
+        });
+
+        document.getElementById("buttonRow").classList.remove("hidden");
 
       } catch (err) {
         spinner.classList.add("hidden");
@@ -253,7 +281,8 @@
       document.getElementById("inputSection").classList.remove("hidden");
       document.getElementById("output").classList.add("hidden");
       document.getElementById("scoreBarContainer").classList.add("hidden");
-      document.getElementById("backBtn").classList.add("hidden");
+      document.getElementById("buttonRow").classList.add("hidden");
+      document.getElementById("articlesSection").classList.add("hidden");
       document.getElementById("priceChart").classList.add("hidden");
       document.getElementById("ticker").value = "";
       
@@ -261,6 +290,13 @@
         window.priceChartInstance.destroy();
         window.priceChartInstance = null;
       }
+    });
+    
+    document.getElementById("articlesBtn").addEventListener("click", () => {
+      const btn = document.getElementById("articlesBtn");
+      const section = document.getElementById("articlesSection");
+      section.classList.toggle("hidden");
+      btn.textContent = section.classList.contains("hidden") ? "Show Articles" : "Hide Articles";
     });
   </script>
 </body>

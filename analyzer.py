@@ -6,17 +6,12 @@ from news.googleArticles import get_google_news_articles
 from news.finnhubArticles import get_finnhub_articles
 from news.deduplicate import deduplicate_articles
 
-def analyze_ticker(ticker):
+def analyze_ticker(ticker, preloaded_articles=None):
     ticker = ticker.upper()
     stock = yf.Ticker(ticker)
     name = (stock.info.get("displayName") or stock.info.get("shortName") or stock.info.get("longName") or ticker).lower()
 
-    # set quantities from each source
-    yahoo_articles = get_yahoo_articles(ticker, 5) #10
-    google_articles = get_google_news_articles(ticker, 0) #10
-    finnhub_articles = get_finnhub_articles(ticker, 0) #10
-
-    articles = deduplicate_articles([yahoo_articles, google_articles, finnhub_articles])
+    articles = preloaded_articles or get_yahoo_articles(ticker, 10)
 
     scores = []
     for art in articles:
