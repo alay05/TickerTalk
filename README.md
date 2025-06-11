@@ -9,6 +9,7 @@ ADD A VIDEO LINK
 ## Features
 
 - **User Input**: Allows users to enter a stock ticker (e.g., `TSLA`, `GOOG`)
+- **Article Aggregation**: Pulls recent news from Yahoo Finance, Google News, and Finnhub APIs to gather relevant headlines for analysis
 - **Sentiment Analysis**: Articles are processed using IBM Watson NLU to extract and score sentiment
 - **Investment Advice**: Displays a "Buy", "Hold", or "Sell" label based on average sentiment
 - **Visualization**:
@@ -28,7 +29,7 @@ ADD A VIDEO LINK
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/TickerTalk.git
+   git clone https://github.com/alay05/TickerTalk.git
    cd TickerTalk
 2. Create a virtual environment and activate it:
    ```bash
@@ -36,7 +37,7 @@ ADD A VIDEO LINK
    source venv/bin/activate
 3. Install dependencies:
    ```bash
-   Install dependencies:
+   pip install -r requirements.txt
 4. Create a '.env' file and add your IBM NLU & Finnhub credentials:
    ```bash
    IBM_API_KEY=your_key_here
