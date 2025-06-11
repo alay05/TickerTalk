@@ -28,10 +28,18 @@ document.addEventListener("DOMContentLoaded", () => {
     section.classList.toggle("hidden");
     articlesBtn.textContent = section.classList.contains("hidden") ? "Show Articles" : "Hide Articles";
   });
+
+  const range = document.getElementById("articleCount");
+  const label = document.getElementById("articleVal");
+  range.addEventListener("input", () => {
+    label.textContent = range.value;
+  });
 });
 
 async function analyze() {
   const ticker = document.getElementById("ticker").value.trim();
+  const articleCount = document.getElementById("articleCount").value;
+
   const spinner = document.getElementById("spinner");
   const output = document.getElementById("output");
   const scoreBarContainer = document.getElementById("scoreBarContainer");
@@ -45,7 +53,12 @@ async function analyze() {
   spinner.classList.remove("hidden");
 
   try {
-    const res = await fetch(`/analyze?ticker=${ticker}`);
+    const query = new URLSearchParams({
+      ticker,
+      article_count: articleCount
+    }).toString();
+
+    const res = await fetch(`/analyze?${query}`);
     const data = await res.json();
 
     spinner.classList.add("hidden");

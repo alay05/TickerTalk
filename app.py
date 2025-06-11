@@ -21,10 +21,22 @@ def analyze():
         return jsonify({'error': 'Ticker required'}), 400
 
     try:
+        # determine article counts based on slider
+        article_count = int(request.args.get("article_count", 10)) # defaults 10
+        
+        yahoo_count = 10
+        google_count = int((article_count-10)*0.25)
+        finnhub_count = int((article_count-10)*0.75)
+
+        total = yahoo_count+google_count+finnhub_count
+
+        if total < article_count:
+            finnhub_count += article_count-total
+
         # fetch articles once here
-        yahoo_articles = get_yahoo_articles(ticker, 10)
-        google_articles = get_google_news_articles(ticker, 0)
-        finnhub_articles = get_finnhub_articles(ticker, 20)
+        yahoo_articles = get_yahoo_articles(ticker, yahoo_count) 
+        google_articles = get_google_news_articles(ticker, google_count)
+        finnhub_articles = get_finnhub_articles(ticker, finnhub_count)
         articles = deduplicate_articles([yahoo_articles, google_articles, finnhub_articles])
 
         # cache for reuse
