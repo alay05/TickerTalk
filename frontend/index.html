@@ -1,69 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stock Sentiment Analyzer</title>
+  <title>TickerTalk</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen px-4">
-  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+  <div class="bg-white p-12 rounded-2xl shadow-xl w-full max-w-2xl">
     <h1 class="text-4xl font-extrabold mb-2 text-center">TickerTalk</h1>
     <p class="text-lg text-gray-600 mb-6 text-center">
         Real-time sentiment analysis from the latest market headlines.
     </p>
-    <form id="sentForm">
-      <div class="mb-4">
-        <label for="ticker" class="block text-sm font-medium text-gray-700 mb-1">
-          Input a ticker symbol below:
-        </label>
-        <input
-          id="ticker"
-          name="ticker"
-          type="text"
-          placeholder="e.g., AAPL"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      <button
-        type="submit"
-        class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
-      >
-        Analyze
-      </button>
-    </form>
 
-    <div id="output" class="mt-6 text-sm text-gray-800 whitespace-pre-wrap font-mono"></div>
+    <!-- Input -->
+    <div id="inputSection">
+      <form id="sentForm">
+        <div class="mb-4">
+          <label for="ticker" class="block text-sm font-medium text-gray-700 mb-1">
+            Input a ticker below:
+          </label>
+          <input
+            id="ticker"
+            name="ticker"
+            type="text"
+            placeholder="e.g., AAPL"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          Analyze
+        </button>
+      </form>
+    </div>
+
+    <!-- Spinner -->
+    <div id="spinner" class="flex justify-center mt-6 hidden">
+      <div class="relative flex h-5 w-5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-5 w-5 bg-blue-500"></span>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div id="output" class="hidden">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h2 id="outputTicker" class="text-2xl font-extrabold uppercase">TICKER</h2>
+          <p id="outputName" class="text-base text-gray-700">Company Name</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <p class="text-base text-gray-600">IBM NLU says:</p>
+          <span id="outputBadge" class="text-white text-xl font-semibold px-6 py-2 rounded-md bg-gray-400">
+            HOLD
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Bar -->
+    <div id="scoreBarContainer" class="mt-10 hidden">
+      <div class="relative w-full bg-gray-200 h-6 rounded-md">
+        <div class="absolute left-0 top-0 h-full bg-red-500 rounded-l-md" style="width: 30%;"></div>
+        <div class="absolute left-[30%] top-0 h-full bg-yellow-400" style="width: 40%;"></div>
+        <div class="absolute left-[70%] top-0 h-full bg-green-500 rounded-r-md" style="width: 30%;"></div>
+
+        <!-- Marker -->
+        <div id="marker" class="absolute -top-2 w-1 bg-black h-10 flex flex-col-reverse items-center z-20 rounded-full transition-all duration-[1.5s] ease-out delay-100">
+          <div class="text-[8px] text-black font-medium leading-tight text-center mb-11">
+            sentiment<br>score
+          </div>
+        </div>
+      </div>
+
+      <!-- Number Labels -->
+      <div class="flex justify-between text-[10px] text-gray-500 mt-0.5">
+        <span>0</span><span>2.5</span><span>5</span><span>7.5</span><span>10</span>
+      </div>
+    </div>
+
+    <!-- Price Chart -->
+    <canvas id="priceChart" class="mt-10 hidden" style="height: 300px; max-height: 300px;"></canvas>
+    
+    <!-- Back Button -->
+    <div class="mt-6">
+      <button id="backBtn" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition hidden">
+        ← Back
+      </button>
+    </div>
   </div>
 
   <script>
     async function analyze() {
       const ticker = document.getElementById("ticker").value.trim();
       const output = document.getElementById("output");
-      output.textContent = "Loading...";
+      const spinner = document.getElementById("spinner");
+      const scoreBarContainer = document.getElementById("scoreBarContainer");
+
+      const outputTicker = document.getElementById("outputTicker");
+      const outputName = document.getElementById("outputName");
+      const outputBadge = document.getElementById("outputBadge");
+      const marker = document.getElementById("marker");
+
+      output.classList.add("hidden");
+      scoreBarContainer.classList.add("hidden");
+      spinner.classList.remove("hidden");
 
       try {
         const res = await fetch(`/analyze?ticker=${ticker}`);
         const data = await res.json();
 
+        spinner.classList.add("hidden");
+
         if (data.error) {
-          output.textContent = `Error: ${data.error}`;
-        } else {
-          output.innerHTML = `
-Ticker: ${data.ticker}
-Company Name: ${data.company_name}
-Score (0-10): ${data.sentiment_score}
-Recommendation: ${data.recommendation}
-          `;
+          output.classList.remove("hidden");
+          outputTicker.textContent = "Error";
+          outputName.textContent = data.error;
+          outputBadge.textContent = "";
+          outputBadge.className = "";
+          return;
         }
+
+        const sentiment = data.recommendation.toLowerCase();
+        let badgeColor = "bg-gray-400";
+        if (sentiment === "buy") badgeColor = "bg-green-500";
+        else if (sentiment === "hold") badgeColor = "bg-yellow-400";
+        else if (sentiment === "sell") badgeColor = "bg-red-500";
+
+        outputTicker.textContent = data.ticker;
+        outputName.textContent = data.company_name;
+        outputBadge.textContent = data.recommendation.toUpperCase();
+        outputBadge.className = `text-white text-2xl font-bold px-5 py-2 rounded-md ${badgeColor}`;
+
+        document.getElementById("inputSection").classList.add("hidden");
+        output.classList.remove("hidden");
+        scoreBarContainer.classList.remove("hidden");
+        document.getElementById("backBtn").classList.remove("hidden");
+
+        const score = parseFloat(data.sentiment_score);
+        const percentage = Math.max(0, Math.min(100, (score / 10) * 100));
+        marker.style.left = '0%';
+        void marker.offsetWidth;
+        marker.style.left = `calc(${percentage}% - 0.5rem)`;
+
+        const chartCanvas = document.getElementById("priceChart");
+        chartCanvas.classList.remove("hidden");
+
+        const histRes = await fetch(`/price-history?ticker=${ticker}`);
+        const histData = await histRes.json();
+
+        if (histData.error) throw new Error(histData.error);
+
+        const labels = histData.labels;
+        const prices = histData.prices;
+
+        if (window.priceChartInstance) {
+          window.priceChartInstance.destroy();
+        }
+
+        window.priceChartInstance = new Chart(chartCanvas, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [{
+              label: `${data.ticker} Price`,
+              data: prices,
+              borderColor: "#2563eb",
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 1.5,
+              pointHoverRadius: 2.5, 
+              pointBackgroundColor: "#2563eb",
+              fill: false,
+            }]
+          },
+          options: {
+            animation: {
+              delay: 100, 
+              duration: 1000,          
+              easing: 'easeOut', 
+            },
+
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { display: false },
+              title: {
+                display: true,
+                text: `Price Movement - Past 12 Months`,
+                font: {
+                  size: 14,
+                  weight: 'bold'
+                },
+                padding: { top: 10, bottom: 10 }
+              }
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "Date",
+                  font: {
+                    weight: 'bold'
+                  }
+                },
+                ticks: {
+                  autoSkip: false,
+                  maxRotation: 45,
+                  minRotation: 45,
+                }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: "Price ($)",
+                  font: {
+                    weight: 'bold'
+                  }
+                },
+                ticks: {
+                  autoSkip: true,
+                  maxRotation: 45,
+                  minRotation: 45,
+                },
+                beginAtZero: false
+              }
+            }
+          }
+        });
+
       } catch (err) {
-        output.textContent = `Fetch error: ${err.message}`;
+        spinner.classList.add("hidden");
+        output.classList.remove("hidden");
+        outputTicker.textContent = "Error";
+        outputName.textContent = err.message;
+        outputBadge.textContent = "";
+        outputBadge.className = "";
       }
     }
+
     document.getElementById("sentForm").addEventListener("submit", function (e) {
-      e.preventDefault();  
+      e.preventDefault();
       analyze();
+    });
+
+    document.getElementById("backBtn").addEventListener("click", () => {
+      document.getElementById("inputSection").classList.remove("hidden");
+      document.getElementById("output").classList.add("hidden");
+      document.getElementById("scoreBarContainer").classList.add("hidden");
+      document.getElementById("backBtn").classList.add("hidden");
+      document.getElementById("priceChart").classList.add("hidden");
+      document.getElementById("ticker").value = "";
+      
+      if (window.priceChartInstance) {
+        window.priceChartInstance.destroy();
+        window.priceChartInstance = null;
+      }
     });
   </script>
 </body>

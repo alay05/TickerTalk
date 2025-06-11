@@ -12,9 +12,9 @@ def analyze_ticker(ticker):
     name = (stock.info.get("displayName") or stock.info.get("shortName") or stock.info.get("longName") or ticker).lower()
 
     # set quantities from each source
-    yahoo_articles = get_yahoo_articles(ticker, 10)
-    google_articles = get_google_news_articles(ticker, 10)
-    finnhub_articles = get_finnhub_articles(ticker, 30)
+    yahoo_articles = get_yahoo_articles(ticker, 5) #10
+    google_articles = get_google_news_articles(ticker, 0) #10
+    finnhub_articles = get_finnhub_articles(ticker, 0) #10
 
     articles = deduplicate_articles([yahoo_articles, google_articles, finnhub_articles])
 
@@ -49,7 +49,7 @@ def analyze_ticker(ticker):
 
     return {
         "ticker": ticker,
-        "company_name": name.title(),
+        "company_name": stock.info.get("shortName").title(),
         "sentiment_score": round(avg_score*5 + 5, 1),
         "recommendation": decision,
     }
