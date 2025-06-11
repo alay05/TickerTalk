@@ -52,6 +52,11 @@ async function analyze() {
   scoreBarContainer.classList.add("hidden");
   spinner.classList.remove("hidden");
 
+  // disable inputs 
+  document.getElementById("ticker").disabled = true;
+  document.getElementById("articleCount").disabled = true;
+  document.querySelector("#sentForm button[type='submit']").disabled = true;
+
   try {
     const query = new URLSearchParams({
       ticker,
@@ -62,6 +67,10 @@ async function analyze() {
     const data = await res.json();
 
     spinner.classList.add("hidden");
+
+    document.getElementById("ticker").disabled = false;
+    document.getElementById("articleCount").disabled = false;
+    document.querySelector("#sentForm button[type='submit']").disabled = false;
 
     if (data.error) {
       output.classList.remove("hidden");
@@ -104,6 +113,9 @@ async function analyze() {
 
   } catch (err) {
     spinner.classList.add("hidden");
+    document.getElementById("ticker").disabled = false;
+    document.getElementById("articleCount").disabled = false;
+    document.querySelector("#sentForm button[type='submit']").disabled = false;
     output.classList.remove("hidden");
     outputTicker.textContent = "Error";
     outputName.textContent = err.message;
