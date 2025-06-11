@@ -4,7 +4,7 @@
 
 TickerTalk is a full-stack web application that analyzes recent news headlines of publicly traded stocks. Users are able to input a stock ticker to fetch relevant articles, which are processed using IBM NLU for sentiment analysis. The output is visualized with an interactive dashboard that includes a sentiment score bar, an investment recommendation (Buy/Hold/Sell), and a historical price chart. Users can also view a page showcasing each of the articles used during analysis, each with a clickable link to the full article.
 
-ADD A VIDEO LINK
+https://github.com/user-attachments/assets/19ff31e9-e998-47b3-b618-81f046748e9a
 
 ## Features
 
