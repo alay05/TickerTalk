@@ -61,7 +61,7 @@ def price_history():
         if hist.empty:
             return jsonify({'error': 'No data found for this ticker'}), 404
 
-        labels = [d.strftime("%b") if d.day < 8 else "" for d in hist.index]
+        labels = [d.strftime("%b-%d-%y") for d in hist.index]
         prices = hist["Close"].round(2).tolist()
         return jsonify({"labels": labels, "prices": prices})
     except Exception as e:

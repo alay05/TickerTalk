@@ -1,7 +1,18 @@
+let isAnalyzing = false;
+let currentController = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("sentForm");
   const backBtn = document.getElementById("backBtn");
   const articlesBtn = document.getElementById("articlesBtn");
+  const analyzeBtn = document.getElementById("analyzeBtn");
+
+  analyzeBtn.addEventListener("click", (e) => {
+    if (isAnalyzing) {
+      e.preventDefault();
+      resetUI();
+    }
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -39,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
 async function analyze() {
   const ticker = document.getElementById("ticker").value.trim();
   const articleCount = document.getElementById("articleCount").value;
-
   const spinner = document.getElementById("spinner");
   const output = document.getElementById("output");
   const scoreBarContainer = document.getElementById("scoreBarContainer");
@@ -47,6 +57,10 @@ async function analyze() {
   const outputName = document.getElementById("outputName");
   const outputBadge = document.getElementById("outputBadge");
   const marker = document.getElementById("marker");
+  const analyzeBtn = document.getElementById("analyzeBtn");
+
+  isAnalyzing = true;
+  analyzeBtn.textContent = "Cancel";
 
   output.classList.add("hidden");
   scoreBarContainer.classList.add("hidden");
@@ -55,7 +69,6 @@ async function analyze() {
   // disable inputs 
   document.getElementById("ticker").disabled = true;
   document.getElementById("articleCount").disabled = true;
-  document.querySelector("#sentForm button[type='submit']").disabled = true;
 
   try {
     const query = new URLSearchParams({
@@ -63,14 +76,16 @@ async function analyze() {
       article_count: articleCount
     }).toString();
 
-    const res = await fetch(`/analyze?${query}`);
+    currentController = new AbortController();
+    const res = await fetch(`/analyze?${query}`, { signal: currentController.signal }); 
     const data = await res.json();
 
     spinner.classList.add("hidden");
 
+    isAnalyzing = false;
+    analyzeBtn.textContent = "Analyze";
     document.getElementById("ticker").disabled = false;
     document.getElementById("articleCount").disabled = false;
-    document.querySelector("#sentForm button[type='submit']").disabled = false;
 
     if (data.error) {
       output.classList.remove("hidden");
@@ -113,14 +128,50 @@ async function analyze() {
 
   } catch (err) {
     spinner.classList.add("hidden");
+    isAnalyzing = false;
+    analyzeBtn.textContent = "Analyze";
     document.getElementById("ticker").disabled = false;
     document.getElementById("articleCount").disabled = false;
-    document.querySelector("#sentForm button[type='submit']").disabled = false;
+
+    // suppress error
+    if (err.name === "AbortError") return;
+
+    // Otherwise show the error as usual
     output.classList.remove("hidden");
     outputTicker.textContent = "Error";
-    outputName.textContent = err.message;
+    outputName.textContent = err.message || "Something went wrong.";
     outputBadge.textContent = "";
     outputBadge.className = "";
+  }
+
+}
+
+function resetUI() {
+  if (currentController) {
+    currentController.abort(); 
+    currentController = null;
+  }
+  isAnalyzing = false;
+
+  document.getElementById("spinner").classList.add("hidden");
+  document.getElementById("output").classList.add("hidden");
+  document.getElementById("scoreBarContainer").classList.add("hidden");
+  document.getElementById("bottomButtons").classList.add("hidden");
+  document.getElementById("articlesSection").classList.add("hidden");
+  document.getElementById("priceChart").classList.add("hidden");
+  document.getElementById("input").classList.remove("hidden");
+
+  document.getElementById("ticker").disabled = false;
+  document.getElementById("articleCount").disabled = false;
+
+  const analyzeBtn = document.getElementById("analyzeBtn");
+  analyzeBtn.textContent = "Analyze";
+
+  document.getElementById("ticker").value = "";
+
+  if (window.priceChartInstance) {
+    window.priceChartInstance.destroy();
+    window.priceChartInstance = null;
   }
 }
 
@@ -176,11 +227,19 @@ async function renderChart(ticker, displayTicker) {
       scales: {
         x: {
           title: { display: true, text: "Date", font: { weight: 'bold' } },
-          ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 }
+          ticks: {
+            callback: function(value, index, ticks) {
+              const label = this.getLabelForValue(value);
+              const month = label.split("-")[0];
+              return index % 4 === 0 ? month : "";
+            },
+            maxRotation: 0,
+            minRotation: 0
+          }
         },
         y: {
           title: { display: true, text: "Price ($)", font: { weight: 'bold' } },
-          ticks: { autoSkip: true, maxRotation: 45, minRotation: 45 },
+          ticks: { autoSkip: true, maxRotation: 0, minRotation: 0 },
           beginAtZero: false
         }
       }

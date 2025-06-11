@@ -6,7 +6,7 @@ FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 
 def get_finnhub_articles(ticker, MAX_ARTICLES):
     today = datetime.now(UTC).date()
-    timeframe = 1 # past amount of days
+    timeframe = 5 # past amount of days
     start_date = today - timedelta(days=timeframe)
     
     url = "https://finnhub.io/api/v1/company-news"
