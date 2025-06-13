@@ -30,7 +30,7 @@ https://github.com/user-attachments/assets/19ff31e9-e998-47b3-b618-81f046748e9a
    cd TickerTalk
 2. Create a virtual environment and activate it:
    ```bash
-   python -m venv venv
+   python3 -m venv venv
    source venv/bin/activate
 3. Install dependencies:
    ```bash
